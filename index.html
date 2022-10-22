@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Horaires arrêt Château de Vincennes</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat">
+
+<style>
+body {
+  font-family: "Geo", sans-serif, helvetica, arial;
+  background-color:#161A25;
+  color:orange;
+  font-size:30px;
+}
+
+h1,
+.descr{
+  font-family: arial;
+  text-align: center;
+  color:#DEDEDF;
+  margin-top:20px;
+  padding-bottom: 10px;
+}
+
+h1{
+  text-transform: uppercase;
+  border-bottom: 2px solid #DEDEDF;
+  font-weight: 400;
+  font-size: 40px;
+
+}
+
+.container{
+  background-color:black;
+  padding:10px;
+}
+
+.row{
+  background-color:#463E3E;
+  display:flex;
+  align-items: center;
+  flex-wrap: wrap;
+  max-height: 250px;
+  min-height: 50px;
+}
+
+.margin{
+  margin-bottom:10px;
+}
+
+.right{
+  text-align:right;
+}
+
+.columns{
+  padding-right:10px;
+  padding-left:10px;
+  flex: 1 0 auto;
+  font-size: 30px;
+}
+
+.push{
+  margin-left: auto;
+  margin-right: 10px;
+}
+
+.intitule{
+  text-align: right;
+  color:#DEDEDF;
+}
+
+@media only screen and (min-width: 700px) {
+  body {
+    margin: 2em;
+    font-size: 36px;
+  }
+  .columns{
+    font-size: 36px;
+  }
+  .push{
+    font-size: 36px;
+  }
+}
+
+</style>
+</head>
+<body>
+  <div class="container">
+    <h1 class="margin">
+      <!--Prochaine arrivée à l'arrêt de métro du Château de Vincennes-->
+      Metros au départ
+    </h1>
+    <div class="columns intitule">
+      Horaire :
+    </div>
+    <div class="row margin">
+      <div id="arret0" class="columns">
+        Arrêt
+      </div>
+      <div id="heure0" class="push">
+        ??
+      </div>
+    </div>
+    <div class="row margin"> 
+      <div id="arret1" class="columns">
+        Arrêt
+      </div>
+      <div id="heure1" class="push">
+        ??
+      </div>
+    </div>
+    <div class="row margin"> 
+      <div id="arret2" class="columns">
+        Arrêt
+      </div>
+      <div id="heure2" class="push">
+        ??
+      </div>
+    </div>
+    <div class="row margin"> 
+      <div id="arret3" class="columns">
+        Arrêt
+      </div>
+      <div id="heure3" class="push">
+        ??
+      </div>
+    </div>
+  </div>
+  <p id="descr" class="descr">
+    en attente de l'API...
+  </p>
+
+<script>
+
+function calc(data,y){
+  let x = y;
+  let arrivee;
+  //let depart = data.Siri.ServiceDelivery.StopMonitoringDelivery[0].MonitoredStopVisit[-les differents arrets sont la-].MonitoredVehicleJourney.MonitoredCall.ExpectedDepartureTime;
+  if(x != (-1)){
+    //si la réponse n'est pas nulle
+    if(x < data.Siri.ServiceDelivery.StopMonitoringDelivery[0].MonitoredStopVisit.length){
+      //si l'entrée de la réponse testée est inférieure ou égale aux nombres de réponses données
+      arrivee = data.Siri.ServiceDelivery.StopMonitoringDelivery[0].MonitoredStopVisit[x].MonitoredVehicleJourney.MonitoredCall.ExpectedArrivalTime;
+      if (typeof arrivee == 'undefined'){
+        //if ExpectArrivalTime doesn't exist
+        arrivee = data.Siri.ServiceDelivery.StopMonitoringDelivery[0].MonitoredStopVisit[x].MonitoredVehicleJourney.MonitoredCall.ExpectedDepartureTime;
+      }
+    }else{
+      //si l'entrée de la réponse testée est supérieur aux nombres de réponses données
+      arrivee = (function () { return; })();
+    }
+  }else{
+    //si la réponse est nulle
+    arrivee = (function () { return; })();
+    x = 0;
+    document.getElementById(("arret1")).innerHTML = ''; 
+    document.getElementById(("heure1")).innerHTML = '';
+    document.getElementById(("arret2")).innerHTML = ''; 
+    document.getElementById(("heure2")).innerHTML = '';
+    document.getElementById(("arret3")).innerHTML = ''; 
+    document.getElementById(("heure3")).innerHTML = '';
+    document.getElementById("descr").innerHTML = "pas d'horaire programmé dans les prochaines heures";
+  }
+  let hours;
+  let minutes;
+  if (typeof arrivee !== 'undefined'){
+    //si l'entrée dans les réponses 'arrivee' existe bien en ayant effectué les tests précédents
+    let time = new Date(arrivee);
+    hours = time.getHours();
+    minutes = time.getMinutes();
+    if(hours < 10){
+      hours = '0'+hours;
+    }
+    if(minutes < 10){
+      minutes = '0'+minutes;
+    }
+    document.getElementById(("arret"+x)).innerHTML = 'CHÂTEAU DE VINCENNES'; 
+    document.getElementById(("heure"+x)).innerHTML = (hours + ':' + minutes);
+    document.getElementById("descr").innerHTML = "mis à jour toutes les minutes";
+  }else{
+    //si l'entrée dans les réponses 'arrivee' n'existe pas en ayant effectué les tests précédents
+    if(x==0){
+      document.getElementById(("arret"+x)).innerHTML = 'CHÂTEAU DE VINCENNES'; 
+      document.getElementById(("heure"+x)).innerHTML = '--:--';
+    }else{
+      document.getElementById(("arret"+x)).innerHTML = ''; 
+      document.getElementById(("heure"+x)).innerHTML = '';
+    }
+  }
+}
+
+function maj() {
+  let myItem;
+
+  const myHeaders = new Headers();
+  myHeaders.append("apiKey", 'EB0B2JaxUZfBQflUuuyUdi9ClTup5u0F');
+  const myRequest = new Request('https://prim.iledefrance-mobilites.fr/marketplace/stop-monitoring?MonitoringRef=STIF:StopPoint:Q:463149:', {
+    //changer 
+    method: 'GET',
+    headers: myHeaders,
+    mode: 'cors',
+    cache: 'default',
+  });
+
+  fetch(myRequest)
+    .then((response) => {
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new TypeError("Oops, we haven't got JSON!");
+      }
+      return response.json();
+    })
+    .then((data) => {
+        //console.log(data);
+        //console.log(data.Siri.ServiceDelivery.StopMonitoringDelivery[0]);
+        let number = data.Siri.ServiceDelivery.StopMonitoringDelivery[0].MonitoredStopVisit.length-1;
+        if(number == (-1)){
+          //si la réponse est nulle, on appelle la fonction d'une façon spéciale
+          calc(data,number);
+        }else{
+          //sinon on remplit les 4 lignes du tableau fournit en réponse
+          //for(let i=0;i<=number;i++){
+          for(let i=0;i<=3;i++){
+            calc(data,i);
+          }
+        }
+    })
+    .catch((error) => console.error(error)); 
+}
+
+maj();
+
+setInterval(function(){
+  //update toutes les minutes
+  maj(); 
+}, 60000);
+
+</script>
+
+</body>
+</html>
